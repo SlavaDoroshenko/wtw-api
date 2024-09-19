@@ -9,23 +9,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class Role
+class UserIsModerator
 {
     /**
      * Handle an incoming request.
      *
      * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next): Response
     {
-        if (!method_exists(User::class, $role) ) {
-            throw new \LogicException("Метод $role отсутствует у модели пользователя");
+        if (Auth::user()->isModerator()) {
+            return $next($request);
         }
 
-        if (!Auth::check() || !Auth::user()->$role()) {
-            throw new AuthorizationException();
-        }
-
-        return $next($request);
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 }

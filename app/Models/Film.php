@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class Film extends Model
 {
@@ -14,12 +15,20 @@ class Film extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_ON_MODERATION = 'moderate';
     public const STATUS_READY = 'ready';
+    public const LIST_FIELDS = ['films.id', 'name', 'preview_image', 'preview_video_link'];
+    public const CACHE_PROMO_KEY = 'promo';
 
     protected $with = ['genres'];
+
+    protected $appends = [
+        'rating',
+        'is_favorite',
+    ];
 
     protected $hidden = [
         'created_at',
         'updated_at',
+        'pivot',
     ];
 
     protected $casts = [
@@ -40,6 +49,9 @@ class Film extends Model
         'starring',
         'run_time',
         'released',
+        'promo',
+        'status',
+        'imdb_id',
     ];
 
     public function genres(): BelongsToMany
@@ -62,6 +74,11 @@ class Film extends Model
         return round($this->scores()->avg('rating'), 1);
     }
 
+    public function getIsFavoriteAttribute()
+    {
+        return Auth::check() && Auth::user()->hasFilm($this);
+    }
+
     /**
      * Добавление сортировки.
      *
@@ -70,7 +87,7 @@ class Film extends Model
      * @param string|null $orderTo
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrdered($query, ?string $orderBy, ?string $orderTo)
+    public function scopeOrdered($query, ?string $orderBy = null, ?string $orderTo = null)
     {
         return $query->when($orderBy === 'rating', function ($q) {
             $q->withAvg('scores as rating', 'rating');

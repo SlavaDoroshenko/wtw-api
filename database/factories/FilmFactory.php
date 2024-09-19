@@ -2,36 +2,36 @@
 
 namespace Database\Factories;
 
+use App\Models\Film;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Film>
- */
 class FilmFactory extends Factory
 {
     /**
      * Define the model's default state.
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            'name' => $this->faker->sentence(3),
-            'poster_image' => $this->faker->imageUrl(),
-            'preview_image' => $this->faker->imageUrl(),
-            'background_image' => $this->faker->imageUrl(),
-            'background_color' => $this->faker->hexColor(),
-            'video_link' => $this->faker->url(),
-            'preview_video_link' => $this->faker->url(),
-            'description' => $this->faker->paragraph(),
+            'name' => $this->faker->words(3, true),
+            'status' => Film::STATUS_READY,
+            'description' => $this->faker->sentences(2, true),
             'director' => $this->faker->name(),
-            'starring' => json_encode($this->faker->words(5)),
-            'run_time' => $this->faker->numberBetween(80, 180),
+            'starring' => [$this->faker->name(), $this->faker->name(), $this->faker->name()],
+            'run_time' => random_int(60, 240),
             'released' => $this->faker->year(),
-            'promo' => $this->faker->boolean(),
-            'status' => 'pending',
-            'imdb_id' => 'tt' . $this->faker->randomNumber(7, true),
+            'imdb_id' => 'tt00' . random_int(1, 9999),
         ];
+    }
+
+    public function pending()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => Film::STATUS_PENDING,
+            ];
+        });
     }
 }

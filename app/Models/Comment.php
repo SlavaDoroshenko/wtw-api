@@ -19,6 +19,13 @@ class Comment extends Model
         'author',
     ];
 
+    protected $fillable = [
+        'text',
+        'rating',
+        'parent_id',
+        'user_id',
+    ];
+
     protected $appends = [
         'author',
     ];
