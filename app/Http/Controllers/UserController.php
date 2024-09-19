@@ -2,44 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function register(RegisterRequest $request)
+    /**
+     * Display the specified resource.
+     */
+    public function show()
     {
-        $user = User::create($request->validated());
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return [
-            'user' => $user,
-            'token' => $token
-        ];
+        return response()->json(Auth::user());
     }
 
-    public function login(LoginRequest $request)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateUserRequest $request)
     {
-        $user = User::where('email', $request->validated()['email'])->first();
-        if (!$user || !Hash::check($request->validated()['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+        $params = $request->safe()->except('file');
+
+        $user = Auth::user();
+        $path = false;
+
+        if($request->hasFile('file')) {
+            $oldFile = $user->avatar;
+            $result = $request->file('file')->store('avatars', 'public');
+            $path = $result ? $request->file('file')->hashName() : false;
+            $params['avatar'] = $path;
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $user->update($params);
 
-        return [
-            'user' => $user,
-            'token' => $token
-        ];
-    }
+        if($path && $oldFile) {
+            Storage::disk('public')->delete($oldFile);
+        }
 
-    public function logout()
-    {
-        auth()->user()->tokens()->delete();
-
-        return response()->json(['message' => 'Logged out'], 200);
+        return response()->json(Auth::user()->makeVisible('email'));
     }
 }
