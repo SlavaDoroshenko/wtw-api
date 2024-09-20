@@ -6,6 +6,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\PromoController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UserController;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
@@ -55,3 +56,12 @@ Route::controller(CommentController::class)
 Route::get('/promo', [PromoController::class, 'show'])->name('promo.show');
 Route::post('/promo/{film}', [PromoController::class, 'store'])->middleware(['auth:sanctum', 'isModerator'])->name('promo.store');
 
+Route::controller(RoomController::class)->middleware('auth:sanctum')->group(function () {
+    Route::get('/rooms', 'index')->name('rooms.index');
+    Route::post('/rooms', 'store')->name('rooms.store');
+    Route::patch('/rooms/{room}', 'update')->name('rooms.update');
+    Route::delete('/rooms/{room}', 'destroy')->name('rooms.destroy');
+
+
+    Route::post('/rooms/{room}/join', 'joinToRoom')->name('rooms.joinToRoom');
+});
