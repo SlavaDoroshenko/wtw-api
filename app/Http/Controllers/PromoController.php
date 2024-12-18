@@ -10,7 +10,32 @@ use Illuminate\Http\Request;
 class PromoController extends Controller
 {
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/films/{film}/promo",
+     *     summary="Set promo status for a film",
+     *     tags={"Promo"},
+     *     @OA\Parameter(
+     *         name="film",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"promo"},
+     *             @OA\Property(property="promo", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Promo status updated successfully",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Film not found"
+     *     )
+     * )
      */
     public function store(PromoStoreRequest $request, Film $film)
     {
@@ -22,7 +47,19 @@ class PromoController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/promo",
+     *     summary="Get the current promo film",
+     *     tags={"Promo"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Current promo film details",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Promo film not found"
+     *     )
+     * )
      */
     public function show(FilmService $service)
     {
@@ -52,3 +89,27 @@ class PromoController extends Controller
         return response()->json($formattedPromo);
     }
 }
+
+/**
+ * @OA\Schema(
+ *     schema="Film",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer"),
+ *     @OA\Property(property="name", type="string"),
+ *     @OA\Property(property="posterImage", type="string"),
+ *     @OA\Property(property="previewImage", type="string"),
+ *     @OA\Property(property="backgroundImage", type="string"),
+ *     @OA\Property(property="backgroundColor", type="string"),
+ *     @OA\Property(property="videoLink", type="string"),
+ *     @OA\Property(property="previewVideoLink", type="string"),
+ *     @OA\Property(property="description", type="string"),
+ *     @OA\Property(property="rating", type="number", format="float"),
+ *     @OA\Property(property="scoresCount", type="integer"),
+ *     @OA\Property(property="director", type="string"),
+ *     @OA\Property(property="starring", type="string"),
+ *     @OA\Property (property="runTime", type="string"),
+ *     @OA\Property(property="genre", type="string"),
+ *     @OA\Property(property="released", type="string"),
+ *     @OA\Property(property="isFavorite", type="boolean")
+ * )
+ */

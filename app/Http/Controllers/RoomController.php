@@ -11,10 +11,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
 class RoomController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/rooms",
+     *     summary="Get a list of rooms",
+     *     tags={"Rooms"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of rooms",
+     *
+     *     )
+     * )
      */
     public function index()
     {
@@ -22,7 +32,16 @@ class RoomController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/rooms",
+     *     summary="Create a new room",
+     *     tags={"Rooms"},
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error while creating room"
+     *     )
+     * )
      */
     public function store(AddRoomRequest $request)
     {
@@ -37,7 +56,22 @@ class RoomController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/rooms/{room}",
+     *     summary="Get a specific room by ID",
+     *     tags={"Rooms"},
+     *     @OA\Parameter(
+     *         name="room",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Room not found"
+     *     )
+     * )
      */
     public function show(Room $room)
     {
@@ -45,7 +79,22 @@ class RoomController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/rooms/{room}",
+     *     summary="Update a specific room",
+     *     tags={"Rooms"},
+     *     @OA\Parameter(
+     *         name="room",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Room not found"
+     *     )
+     * )
      */
     public function update(UpdateRoomRequest $request, Room $room)
     {
@@ -55,7 +104,28 @@ class RoomController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/rooms/{room}",
+     *     summary="Delete a specific room",
+     *     tags={"Rooms"},
+     *     @OA\Parameter(
+     *         name="room",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Room deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Room is deleted")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Room not found"
+     *     )
+     * )
      */
     public function destroy(Room $room)
     {
@@ -65,6 +135,31 @@ class RoomController extends Controller
         return response()->json(['message' => 'Room is deleted']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/rooms/{room}/join",
+     *     summary="Join a room",
+     *     tags={"Rooms"},
+     *     @OA\Parameter(
+     *         name="room",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="User  added to the room",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User  is added")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Incorrect password"
+     *     )
+     * )
+     */
     public function joinToRoom(JoinToRoomRequest $request, Room $room)
     {
         if (!Hash::check($request->validated()['password'], $room->password)) {
@@ -72,6 +167,46 @@ class RoomController extends Controller
         }
 
         $room->users()->attach(Auth::user());
-        return response()->json(['message' => 'User is added']);
+        return response()->json(['message' => 'User  is added']);
     }
 }
+
+/**
+ * @OA\Schema(
+ *     schema="Room",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer"),
+ *     @OA\Property(property="name", type="string"),
+ *     @OA\Property(property="password", type="string"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ */
+
+/**
+ * @OA\Schema(
+ *     schema="AddRoomRequest",
+ *     type="object",
+ *     required={"name", "password"},
+ *     @OA\Property(property="name", type="string"),
+ *     @OA\Property(property="password", type="string")
+ * )
+ */
+
+/**
+ * @OA\Schema(
+ *     schema="UpdateRoomRequest",
+ *     type="object",
+ *     required={"name"},
+ *     @OA\Property(property="name", type="string")
+ * )
+ */
+
+/**
+ * @OA\Schema(
+ *     schema="JoinToRoomRequest",
+ *     type="object",
+ *     required={"password"},
+ *     @OA\Property(property="password", type="string")
+ * )
+ */

@@ -12,7 +12,25 @@ use Illuminate\Support\Facades\Auth;
 class CommentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/films/{film}/comments",
+     *     summary="Get comments for a film",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="film",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of comments",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Film not found"
+     *     )
+     * )
      */
     public function index(Film $film)
     {
@@ -20,7 +38,30 @@ class CommentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/films/{film}/comments",
+     *     summary="Add a new comment to a film",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="film",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"rating", "comment"},
+     *             @OA\Property(property="rating", type="integer", example=5),
+     *             @OA\Property(property="comment", type="string", example="Great movie!"),
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     )
+     * )
      */
     public function store(AddCommentRequest $request, Film $film)
     {
@@ -34,17 +75,65 @@ class CommentController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/comments/{comment}",
+     *     summary="Update a comment",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="comment",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"rating", "comment"},
+     *             @OA\Property(property="rating", type="integer", example=5),
+     *             @OA\Property(property="comment", type="string", example="Updated comment text"),
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Comment not found"
+     *     )
+     * )
      */
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
         $comment->update($request->validated());
 
-        return response()->json(['comment' => $comment], 201);
+        return response()->json(['comment' => $comment], 200);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/comments/{comment}",
+     *     summary="Delete a comment",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="comment",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Comment deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Comment deleted")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Comment not found"
+     *     )
+     * )
      */
     public function destroy(Comment $comment)
     {
@@ -54,7 +143,5 @@ class CommentController extends Controller
             $comment->delete();
             return response()->json(['message' => 'Comment deleted'], 200);
         }
-
-
     }
 }
