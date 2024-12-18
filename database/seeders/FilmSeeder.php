@@ -7,7 +7,7 @@ use App\Models\Film;
 use App\Models\Genre;
 use Illuminate\Database\Seeder;
 
-class FilmSeeder extends Seeder
+class  FilmSeeder extends Seeder
 {
     /**
      * Run the database seeds.

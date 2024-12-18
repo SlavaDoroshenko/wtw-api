@@ -29,6 +29,7 @@ return new class extends Migration
             $table->boolean('promo')->default(false);
             $table->string('status')->default(Film::STATUS_PENDING);
             $table->string('imdb_id');
+            $table->float('rating', 3, 1)->nullable();
             $table->timestamps();
         });
     }

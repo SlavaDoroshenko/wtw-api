@@ -14,12 +14,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
 Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('auth.logout');
+Route::delete('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('auth.logout');
 
 Route::controller(UserController::class)
     ->middleware('auth:sanctum')
     ->group(function () {
-        Route::get('/user', 'show')->name('user.show');
+        Route::get('/login', 'show')->name('user.show');
         Route::patch('/user', 'update')->name('user.update');
     });
 
@@ -40,15 +40,14 @@ Route::controller(FavoriteController::class)
     ->middleware('auth:sanctum')
     ->group(function () {
         Route::get('/favorite', 'index')->name('favorite.index');
-        Route::post('/films/{film}/favorite', 'store')->name('favorite.store');
-        Route::delete('/films/{film}/favorite', 'destroy')->name('favorite.destroy');
+        Route::post('/favorite/{filmId}/{status}', 'updateFavoriteStatus')->name('favorite.update');
     });
 
-Route::get('/films/{film}/comments', [CommentController::class, 'index'])->name('comments.index');
+Route::get('comments/{film}', [CommentController::class, 'index'])->name('comments.index');
 Route::controller(CommentController::class)
     ->middleware('auth:sanctum')
     ->group(function () {
-        Route::post('/films/{film}/comments', 'store')->name('comments.store');
+        Route::post('comments/{film}', 'store')->name('comments.store');
         Route::patch('/comments/{comment}', 'update')->name('comments.update');
         Route::delete('/comments/{comment}', 'destroy')->name('comments.destroy');
     });

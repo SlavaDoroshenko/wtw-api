@@ -16,7 +16,7 @@ class CommentController extends Controller
      */
     public function index(Film $film)
     {
-        return response()->json($film->comments()->latest()->get());
+        return response()->json($film->comments()->get());
     }
 
     /**
@@ -25,9 +25,8 @@ class CommentController extends Controller
     public function store(AddCommentRequest $request, Film $film)
     {
         $comment = $film->comments()->create([
-            'parent_id' => $request->parent_id,
             'rating' => $request->rating,
-            'text' => $request->text,
+            'text' => $request->comment,
             'user_id' => Auth::id(),
         ]);
 

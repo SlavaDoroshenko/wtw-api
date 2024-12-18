@@ -14,22 +14,35 @@ class FilmController extends Controller
      */
     public function index(Request $request)
     {
-        $films = Film::select(Film::LIST_FIELDS)
-            ->when($request->has('genre'), function ($query) use ($request) {
-                $query->whereRelation('genres', 'name', $request->get('genre'));
-            })
-            ->when($request->has('status') && $request->user()?->isModerator(),
-                function ($query) use ($request) {
-                    $query->whereStatus($request->get('status'));
-                },
-                function ($query) {
-                    $query->whereStatus(Film::STATUS_READY);
-                }
-            )
-            ->ordered($request->get('order_by'), $request->get('order_to'))
-            ->paginate(8);
+        $films = Film::with('genres')->get();
 
-        return response()->json($films);
+        // Преобразование данных в нужный формат
+        $formattedFilms = $films->map(function ($film) {
+            return [
+                'id' => $film->id,
+                'name' => $film->name,
+                'posterImage' => $film->poster_image,
+                'previewImage' => $film->preview_image,
+                'backgroundImage' => $film->background_image,
+                'backgroundColor' => $film->background_color,
+                'videoLink' => $film->video_link,
+                'previewVideoLink' => $film->preview_video_link,
+                'description' => $film->description,
+                'rating' => $film->rating,
+                'scoresCount' => $film->scores_count,
+                'director' => $film->director,
+                'starring' => $film->starring,
+                'runTime' => $film->run_time,
+                'genre' => $film->genres->first()->name ?? null,
+                'released' => $film->released,
+                'isFavorite' => $film->is_favorite,
+            ];
+        });
+
+        return response()->json(
+$formattedFilms,
+
+        );
     }
 
     /**
@@ -50,7 +63,26 @@ class FilmController extends Controller
      */
     public function show(Film $film)
     {
-        return response()->json($film->append('rating')->loadCount('scores'));
+        $formattedFilm = [
+                'id' => $film->id,
+                'name' => $film->name,
+                'posterImage' => $film->poster_image,
+                'previewImage' => $film->preview_image,
+                'backgroundImage' => $film->background_image,
+                'backgroundColor' => $film->background_color,
+                'videoLink' => $film->video_link,
+                'previewVideoLink' => $film->preview_video_link,
+                'description' => $film->description,
+                'rating' => $film->rating,
+                'scoresCount' => $film->scores_count,
+                'director' => $film->director,
+                'starring' => $film->starring,
+                'runTime' => $film->run_time,
+                'genre' => $film->genres->first()->name ?? null,
+                'released' => $film->released,
+                'isFavorite' => $film->is_favorite,
+            ];
+        return response()->json($formattedFilm);
     }
 
     /**

@@ -13,38 +13,86 @@ class FavoriteController extends Controller
      */
     public function index()
     {
-        $films = Auth::user()->films()->get(Film::LIST_FIELDS)->toArray();
+        $films = Auth::user()->films()->with('genres')->get();
 
-        return response()->json($films);
+        $formattedFilms = $films->map(function ($film) {
+            return [
+                'id' => $film->id,
+                'name' => $film->name,
+                'posterImage' => $film->poster_image,
+                'previewImage' => $film->preview_image,
+                'backgroundImage' => $film->background_image,
+                'backgroundColor' => $film->background_color,
+                'videoLink' => $film->video_link,
+                'previewVideoLink' => $film->preview_video_link,
+                'description' => $film->description,
+                'rating' => $film->rating,
+                'scoresCount' => $film->scores_count,
+                'director' => $film->director,
+                'starring' => $film->starring,
+                'runTime' => $film->run_time,
+                'genre' => $film->genres->first()->name ?? null,
+                'released' => $film->released,
+                'isFavorite' => $film->is_favorite,
+            ];
+        });
+
+        return response()->json(
+            $formattedFilms,
+
+        );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Film $film)
+    public function updateFavoriteStatus($filmId, $status)
     {
         $user = Auth::user();
-        if ($user->hasFilm($film)) {
-          return response()->json('Такой фильм уже находиться в избранном', 403);
+        $film = Film::find($filmId);
+
+        if (!$film) {
+            return response()->json('Фильм не найден', 404);
         }
 
-        $user->films()->attach($film);
+        // Приводим статус к булевому значению
+        $isFavorite = $status == 1;
 
-        return response()->json($film, 201);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Film $film)
-    {
-        $user = Auth::user();
-        if (!$user->hasFilm($film)) {
-            return response()->json('Такого фильма итак нет в избранном', 403);
+        if ($isFavorite) {
+            // Если статус 1, добавляем фильм в избранное
+            if ($user->hasFilm($film)) {
+                return response()->json('Такой фильм уже находится в избранном', 403);
+            }
+            $user->films()->attach($film);
+        } else {
+            // Если статус 0, удаляем фильм из избранного
+            if (!$user->hasFilm($film)) {
+                return response()->json('Такого фильма итак нет в избранном', 403);
+            }
+            $user->films()->detach($film);
         }
 
-        $user->films()->detach($film);
-
-        return response()->json($film, 201);
+        // Возвращаем обновленный фильм
+        $film->is_favorite = $isFavorite; // Обновляем поле isFavorite
+        $formattedFilm = [
+                'id' => $film->id,
+                'name' => $film->name,
+                'posterImage' => $film->poster_image,
+                'previewImage' => $film->preview_image,
+                'backgroundImage' => $film->background_image,
+                'backgroundColor' => $film->background_color,
+                'videoLink' => $film->video_link,
+                'previewVideoLink' => $film->preview_video_link,
+                'description' => $film->description,
+                'rating' => $film->rating,
+                'scoresCount' => $film->scores_count,
+                'director' => $film->director,
+                'starring' => $film->starring,
+                'runTime' => $film->run_time,
+                'genre' => $film->genres->first()->name ?? null,
+                'released' => $film->released,
+                'isFavorite' => $film->is_favorite,
+            ];
+        return response()->json($formattedFilm, 200);
     }
 }

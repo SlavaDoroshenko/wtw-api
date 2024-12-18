@@ -15,7 +15,24 @@ class Film extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_ON_MODERATION = 'moderate';
     public const STATUS_READY = 'ready';
-    public const LIST_FIELDS = ['films.id', 'name', 'preview_image', 'preview_video_link'];
+    public const LIST_FIELDS = ['films.id',
+        'name',
+        'poster_image',
+        'preview_image',
+        'background_image',
+        'background_color',
+        'video_link',
+        'preview_video_link',
+        'description',
+        'director',
+        'starring',
+        'run_time',
+        'released',
+        'status',
+        'imdb_id',
+        'promo',
+        'rating'];
+
     public const CACHE_PROMO_KEY = 'promo';
 
     protected $with = ['genres'];
@@ -49,9 +66,10 @@ class Film extends Model
         'starring',
         'run_time',
         'released',
-        'promo',
         'status',
         'imdb_id',
+        'promo',
+        'rating'
     ];
 
     public function genres(): BelongsToMany

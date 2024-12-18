@@ -23,9 +23,8 @@ class AddCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'text' => 'required|string|max:1000',
+            'comment' => 'required|string|max:1000',
             'rating' => 'required|integer|min:1|max:10',
-            'parent_id' => 'nullable|exists:comments,id',
         ];
     }
 }
